@@ -51,5 +51,8 @@ http://127.0.0.1:5000
 🎯 Aim
 To build an AI-enabled unified grievance portal that automates complaint classification and improves efficiency in public complaint redressal.
 
+working image:
+<img width="1366" height="768" alt="Image" src="https://github.com/user-attachments/assets/dac656ea-dac3-445f-88ab-f0b10b32bcf5" />
+
 
 
