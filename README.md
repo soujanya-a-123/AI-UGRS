@@ -13,8 +13,8 @@ Department/Admin dashboard
 Email notifications and escalation alerts
 PDF acknowledgement and resolution reports
 Chatbot for citizen assistance
-🛠️ Technologies Used
 
+🛠️ Technologies Used
 Frontend: HTML, CSS, JavaScript
 Backend: Python, Flask
 AI/ML: TF-IDF Vectorizer, Naive Bayes Classifier
@@ -23,17 +23,6 @@ Database: SQLite
 Visualization: Google Charts
 Other: ReportLab (PDF generation), Email services
 
-📂 Project Structure
-govt/
-│
-├── templates/        # HTML files
-├── static/           # CSS, JS, assets
-├── instance/         # Database files
-├── model.py          # ML model
-├── app.py            # Main application
-├── sample.json       # Training data
-└── requirements.txt
-
 ⚙️ Installation & Setup
 1. Clone Repository
 git clone https://github.com/your-username/govt.git
@@ -41,7 +30,6 @@ cd govt
 
 2. Create Virtual Environment
 python -m venv venv
-
 
 Activate:
 Windows:
