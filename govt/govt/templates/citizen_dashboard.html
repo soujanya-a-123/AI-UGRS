@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Citizen Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-4">
+    <div class="card card-shadow mb-4">
+      <div class="card-body">
+        <h4 class="mb-1">Hello, {{ session.get('citizen_name') }}</h4>
+        <p class="text-muted mb-0">
+          Welcome to the AT-Driven Unified Grievance Redressal System.
+        </p>
+      </div>
+    </div>
+
+    <div class="card card-shadow">
+      <div class="card-body">
+        <h5>My Complaint Summary</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Total Complaints</span>
+            <span class="fw-bold">{{ total }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Pending / In-Progress</span>
+            <span class="fw-bold">{{ pending }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Resolved</span>
+            <span class="fw-bold text-success">{{ resolved }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <a class="text-decoration-none" href="{{ url_for('submit_grievance') }}">
+          <div class="card card-shadow h-100">
+            <div class="card-body text-center">
+              <h5 class="card-title">Submit Grievance</h5>
+              <p class="text-muted">
+                Register a new complaint with full details of the issue.
+              </p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6">
+        <a class="text-decoration-none" href="{{ url_for('my_complaints') }}">
+          <div class="card card-shadow h-100">
+            <div class="card-body text-center">
+              <h5 class="card-title">My Complaints</h5>
+              <p class="text-muted">
+                View all complaints raised by you along with status.
+              </p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6">
+        <a class="text-decoration-none" href="{{ url_for('track_complaint') }}">
+          <div class="card card-shadow h-100">
+            <div class="card-body text-center">
+              <h5 class="card-title">Track Complaint</h5>
+              <p class="text-muted">
+                Use Ticket ID to check status and acknowledgement.
+              </p>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+    </div>
+  </div>
+</div>
+{% endblock %}

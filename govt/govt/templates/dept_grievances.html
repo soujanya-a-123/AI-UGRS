@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Department Grievances{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Grievances – {{ department.name }}</h3>
+  <form class="d-flex" method="get">
+    <label class="me-2 mt-1">Status:</label>
+    <select name="status" class="form-select form-select-sm me-2">
+      <option value="all" {{ 'selected' if status_filter=='all' else '' }}>All</option>
+      <option value="Pending" {{ 'selected' if status_filter=='Pending' else '' }}>Pending</option>
+      <option value="In-Progress" {{ 'selected' if status_filter=='In-Progress' else '' }}>In-Progress</option>
+      <option value="Resolved" {{ 'selected' if status_filter=='Resolved' else '' }}>Resolved</option>
+      <option value="Escalated" {{ 'selected' if status_filter=='Escalated' else '' }}>Escalated</option>
+    </select>
+    <button class="btn btn-sm btn-outline-primary" type="submit">Filter</button>
+  </form>
+</div>
+
+<div class="card card-shadow">
+  <div class="card-body">
+    {% if complaints %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Title</th>
+              <th>Citizen</th>
+              <th>Location</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Deadline</th>
+              <th>Update</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for c in complaints %}
+            <tr>
+              <td>{{ format_ticket_id(c.id) }}</td>
+              <td>{{ c.title }}</td>
+              <td>{{ c.citizen.name if c.citizen else '-' }}</td>
+              <td>{{ c.location or '-' }}</td>
+              <td>
+                <span class="badge
+                  {% if c.priority=='Urgent' %}bg-danger
+                  {% elif c.priority=='Medium' %}bg-warning text-dark
+                  {% else %}bg-secondary{% endif %}">
+                  {{ c.priority }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-{% if c.status=='Resolved' %}success{% elif c.status=='Escalated' %}danger{% elif c.status=='In-Progress' %}warning text-dark{% else %}secondary{% endif %}">
+                  {{ c.status }}
+                </span>
+              </td>
+              <td>{% if c.deadline %}{{ c.deadline.strftime('%d-%m-%Y') }}{% else %}-{% endif %}</td>
+              <td style="min-width: 280px;">
+                <form method="post" action="{{ url_for('update_complaint_status', complaint_id=c.id) }}" class="row g-1">
+                  <div class="col-md-4">
+                    <select name="status" class="form-select form-select-sm">
+                      {% for st in ['Pending','In-Progress','Resolved','Escalated'] %}
+                        <option value="{{ st }}" {{ 'selected' if c.status==st else '' }}>{{ st }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <select name="priority" class="form-select form-select-sm">
+                      {% for pr in ['Low','Medium','Urgent'] %}
+                        <option value="{{ pr }}" {{ 'selected' if c.priority==pr else '' }}>{{ pr }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="text" name="resolution" class="form-control form-control-sm"
+                           placeholder="Resolution (optional)">
+                  </div>
+                  <div class="col-md-2 d-grid">
+                    <button class="btn btn-sm btn-primary" type="submit">Save</button>
+                  </div>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0">No complaints for this department yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

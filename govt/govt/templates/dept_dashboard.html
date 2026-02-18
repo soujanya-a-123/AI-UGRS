@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+{% block title %}Department Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+  <div class="col">
+    <h3>Department Dashboard – {{ department.name }}</h3>
+  </div>
+  <div class="col-auto">
+    <a href="{{ url_for('department_grievances') }}" class="btn btn-primary">
+      View Grievances
+    </a>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Total Complaints</h6>
+        <p class="display-6 mb-0">{{ total }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>In-Progress</h6>
+        <p class="display-6 mb-0">{{ in_progress }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Resolved</h6>
+        <p class="display-6 text-success mb-0">{{ resolved }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Pending</h6>
+        <p class="display-6 text-warning mb-0">{{ total - in_progress - resolved }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Location Visualization Section -->
+<div class="row g-3">
+  <!-- Ward-wise Distribution -->
+  <div class="col-lg-6">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Complaints by Ward</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="wardChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Clusters -->
+  <div class="col-lg-6">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Location Clusters</h5>
+      </div>
+      <div class="card-body">
+        <div id="clusterMap" style="height: 300px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+          <div class="text-center text-muted">
+            <i class="fas fa-map-marked-alt fa-3x mb-2"></i>
+            <p>Location clustering visualization</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- District-wise Distribution -->
+  <div class="col-lg-6">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Complaints by District</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="districtChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority Distribution -->
+  <div class="col-lg-6">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Priority Distribution</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="priorityChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Heat Map Table -->
+  <div class="col-lg-12">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Location-wise Complaint Summary</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Ward</th>
+                <th>District</th>
+                <th>Total Complaints</th>
+                <th>In Progress</th>
+                <th>Resolved</th>
+                <th>Pending</th>
+                <th>Hotspot Level</th>
+              </tr>
+            </thead>
+            <tbody id="locationTable">
+              <!-- Data will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Chart.js and Simple Maps -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+
+<script>
+// Get complaints data from the backend
+const complaints = [
+  {% for complaint in complaints %}
+  {
+    id: {{ complaint.id }},
+    title: "{{ complaint.title }}",
+    ward: "{{ complaint.ward or 'Unknown' }}",
+    district: "{{ complaint.district or 'Unknown' }}",
+    location: "{{ complaint.location or '' }}",
+    status: "{{ complaint.status }}",
+    priority: "{{ complaint.priority }}",
+    address: "{{ complaint.address or '' }}"
+  }{% if not loop.last %},{% endif %}
+  {% endfor %}
+];
+
+// Process data for charts and maps
+function processLocationData() {
+  const wardData = {};
+  const districtData = {};
+  const locationData = {};
+  const priorityData = { Low: 0, Medium: 0, Urgent: 0 };
+
+  complaints.forEach(complaint => {
+    // Ward data
+    const ward = complaint.ward || 'Unknown';
+    if (!wardData[ward]) {
+      wardData[ward] = { total: 0, resolved: 0, inProgress: 0, pending: 0 };
+    }
+    wardData[ward].total++;
+    if (complaint.status === 'Resolved') wardData[ward].resolved++;
+    else if (complaint.status === 'In-Progress') wardData[ward].inProgress++;
+    else wardData[ward].pending++;
+
+    // District data
+    const district = complaint.district || 'Unknown';
+    if (!districtData[district]) {
+      districtData[district] = { total: 0, resolved: 0, inProgress: 0, pending: 0 };
+    }
+    districtData[district].total++;
+    if (complaint.status === 'Resolved') districtData[district].resolved++;
+    else if (complaint.status === 'In-Progress') districtData[district].inProgress++;
+    else districtData[district].pending++;
+
+    // Priority data
+    priorityData[complaint.priority]++;
+  });
+
+  return { wardData, districtData, priorityData };
+}
+
+// Initialize Charts
+function initializeCharts() {
+  const { wardData, districtData, priorityData } = processLocationData();
+
+  // Ward Chart
+  const wardCtx = document.getElementById('wardChart').getContext('2d');
+  const wardChart = new Chart(wardCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(wardData),
+      datasets: [{
+        label: 'Total Complaints',
+        data: Object.values(wardData).map(d => d.total),
+        backgroundColor: '#0d6efd',
+        borderColor: '#0b5ed7',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      }
+    }
+  });
+
+  // District Chart
+  const districtCtx = document.getElementById('districtChart').getContext('2d');
+  const districtChart = new Chart(districtCtx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(districtData),
+      datasets: [{
+        data: Object.values(districtData).map(d => d.total),
+        backgroundColor: [
+          '#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545',
+          '#fd7e14', '#ffc107', '#198754', '#20c997', '#0dcaf0'
+        ],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  // Priority Chart
+  const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+  const priorityChart = new Chart(priorityCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Low', 'Medium', 'Urgent'],
+      datasets: [{
+        data: [priorityData.Low, priorityData.Medium, priorityData.Urgent],
+        backgroundColor: ['#6c757d', '#ffc107', '#dc3545'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+}
+
+// Initialize Cluster Map
+function initializeClusterMap() {
+  const mapContainer = document.getElementById('clusterMap');
+  
+  // Simple cluster visualization using colored circles
+  const { wardData } = processLocationData();
+  const wards = Object.keys(wardData);
+  
+  if (wards.length === 0) return;
+
+  let mapHTML = '<div class="text-center p-3">';
+  mapHTML += '<h6>Ward-wise Complaint Density</h6>';
+  mapHTML += '<div class="d-flex flex-wrap justify-content-center gap-3 mt-3">';
+  
+  wards.forEach(ward => {
+    const count = wardData[ward].total;
+    let size = '20px';
+    let color = '#6c757d';
+    
+    if (count >= 10) {
+      size = '50px';
+      color = '#dc3545'; // High density - red
+    } else if (count >= 5) {
+      size = '35px';
+      color = '#ffc107'; // Medium density - yellow
+    } else if (count >= 3) {
+      size = '25px';
+      color = '#0d6efd'; // Low density - blue
+    }
+    
+    mapHTML += `
+      <div class="text-center">
+        <div style="width: ${size}; height: ${size}; background: ${color}; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+          ${count}
+        </div>
+        <small class="d-block mt-1">${ward}</small>
+      </div>
+    `;
+  });
+  
+  mapHTML += '</div></div>';
+  mapContainer.innerHTML = mapHTML;
+}
+
+// Populate Location Table
+function populateLocationTable() {
+  const { wardData, districtData } = processLocationData();
+  const tableBody = document.getElementById('locationTable');
+  
+  let tableHTML = '';
+  
+  Object.keys(wardData).forEach(ward => {
+    const data = wardData[ward];
+    const district = Object.keys(districtData).find(d => 
+      districtData[d].total === data.total
+    ) || 'Unknown';
+    
+    let hotspotLevel = 'Low';
+    let badgeClass = 'bg-success';
+    
+    if (data.total >= 10) {
+      hotspotLevel = 'High';
+      badgeClass = 'bg-danger';
+    } else if (data.total >= 5) {
+      hotspotLevel = 'Medium';
+      badgeClass = 'bg-warning';
+    }
+    
+    tableHTML += `
+      <tr>
+        <td><strong>${ward}</strong></td>
+        <td>${district}</td>
+        <td>${data.total}</td>
+        <td>${data.inProgress}</td>
+        <td>${data.resolved}</td>
+        <td>${data.pending}</td>
+        <td><span class="badge ${badgeClass}">${hotspotLevel}</span></td>
+      </tr>
+    `;
+  });
+  
+  tableBody.innerHTML = tableHTML;
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initializeCharts();
+  initializeClusterMap();
+  populateLocationTable();
+});
+</script>
+
+<style>
+#clusterMap .cluster-circle {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+#clusterMap .cluster-circle:hover {
+  transform: scale(1.1);
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+}
+</style>
+{% endblock %}

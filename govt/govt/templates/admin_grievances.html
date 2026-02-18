@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}All Grievances{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>All Grievances</h3>
+  <form class="row gx-2 gy-1" method="get">
+    <div class="col-auto">
+      <select name="department_id" class="form-select form-select-sm">
+        <option value="all" {{ 'selected' if dept_id=='all' else '' }}>All Departments</option>
+        {% for d in departments %}
+          <option value="{{ d.id }}" {{ 'selected' if dept_id|int==d.id else '' }}>{{ d.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <select name="status" class="form-select form-select-sm">
+        <option value="all" {{ 'selected' if status_filter=='all' else '' }}>All Status</option>
+        {% for st in ['Pending','In-Progress','Resolved','Escalated'] %}
+          <option value="{{ st }}" {{ 'selected' if status_filter==st else '' }}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-sm btn-outline-primary" type="submit">Filter</button>
+    </div>
+  </form>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-md-2">
+    <div class="card card-shadow text-center">
+      <div class="card-body py-2">
+        <small class="text-muted">Total</small>
+        <h6 class="mb-0">{{ complaints|length }}</h6>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-shadow text-center">
+      <div class="card-body py-2">
+        <small class="text-muted">Pending</small>
+        <h6 class="mb-0">{{ complaints|selectattr('status', 'equalto', 'Pending')|list|length }}</h6>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-shadow text-center">
+      <div class="card-body py-2">
+        <small class="text-muted">In Progress</small>
+        <h6 class="mb-0">{{ complaints|selectattr('status', 'equalto', 'In-Progress')|list|length }}</h6>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-shadow text-center">
+      <div class="card-body py-2">
+        <small class="text-muted">Resolved</small>
+        <h6 class="mb-0 text-success">{{ complaints|selectattr('status', 'equalto', 'Resolved')|list|length }}</h6>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-shadow text-center">
+      <div class="card-body py-2">
+        <small class="text-muted">Escalated</small>
+        <h6 class="mb-0 text-danger">{{ complaints|selectattr('status', 'equalto', 'Escalated')|list|length }}</h6>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-shadow text-center">
+      <div class="card-body py-2">
+        <small class="text-muted">Urgent</small>
+        <h6 class="mb-0 text-danger">{{ complaints|selectattr('priority', 'equalto', 'Urgent')|list|length }}</h6>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-shadow">
+  <div class="card-body">
+    {% if complaints %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Title</th>
+              <th>Citizen</th>
+              <th>Department</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>District</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for c in complaints %}
+            <tr>
+              <td>{{ format_ticket_id(c.id) }}</td>
+              <td>{{ c.title }}</td>
+              <td>{{ c.citizen.name if c.citizen else '-' }}</td>
+              <td>{{ c.department.name if c.department else '-' }}</td>
+              <td>
+                <span class="badge
+                  {% if c.priority=='Urgent' %}bg-danger
+                  {% elif c.priority=='Medium' %}bg-warning text-dark
+                  {% else %}bg-secondary{% endif %}">
+                  {{ c.priority }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-{% if c.status=='Resolved' %}success{% elif c.status=='Escalated' %}danger{% elif c.status=='In-Progress' %}warning text-dark{% else %}secondary{% endif %}">
+                  {{ c.status }}
+                </span>
+              </td>
+              <td>{{ c.district or '-' }}</td>
+              <td>{{ c.created_at.strftime('%d-%m-%Y') }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0">No complaints found.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

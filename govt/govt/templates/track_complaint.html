@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Track Complaint{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card card-shadow mb-3">
+      <div class="card-body">
+        <h3 class="mb-3">Track Complaint</h3>
+        <form method="post" class="row g-3 align-items-end">
+          <div class="col-md-8">
+            <label class="form-label">Ticket ID</label>
+            <input type="text" name="ticket_id" value="{{ ticket_id or '' }}" class="form-control"
+                   placeholder="e.g. AI-UGRS-0001" required>
+          </div>
+          <div class="col-md-4 d-grid">
+            <button class="btn btn-primary" type="submit">Track</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if complaint %}
+      <div class="card card-shadow">
+        <div class="card-body">
+          <h5>Ticket: {{ format_ticket_id(complaint.id) }}</h5>
+          <p class="mb-1"><strong>Title:</strong> {{ complaint.title }}</p>
+          <p class="mb-1"><strong>Description:</strong> {{ complaint.description }}</p>
+          <p class="mb-1"><strong>Department:</strong> {{ complaint.department.name if complaint.department else 'Not assigned' }}</p>
+          <p class="mb-1">
+            <strong>Priority:</strong>
+            <span class="badge
+              {% if complaint.priority=='Urgent' %}bg-danger
+              {% elif complaint.priority=='Medium' %}bg-warning text-dark
+              {% else %}bg-secondary{% endif %}">
+              {{ complaint.priority }}
+            </span>
+          </p>
+          <p class="mb-1">
+            <strong>Status:</strong>
+            <span class="badge bg-{% if complaint.status=='Resolved' %}success{% elif complaint.status=='Escalated' %}danger{% elif complaint.status=='In-Progress' %}warning text-dark{% else %}secondary{% endif %}">
+              {{ complaint.status }}
+            </span>
+          </p>
+          <p class="mb-1"><strong>Created:</strong> {{ complaint.created_at.strftime('%d-%m-%Y %H:%M') }}</p>
+          {% if complaint.deadline %}
+            <p class="mb-1"><strong>Expected SLA:</strong> {{ complaint.deadline.strftime('%d-%m-%Y') }}</p>
+          {% endif %}
+          {% if complaint.resolution %}
+            <p class="mb-1"><strong>Resolution:</strong> {{ complaint.resolution }}</p>
+          {% endif %}
+          <hr>
+          <p class="text-muted mb-0">
+            This represents the “Download Acknowledgement” view from your design – you can add
+            PDF generation here later.
+          </p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

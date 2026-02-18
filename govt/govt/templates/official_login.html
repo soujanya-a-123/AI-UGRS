@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Officials Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card card-shadow">
+      <div class="card-body">
+        <h3 class="mb-3 text-center">Officials Login</h3>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select" required>
+              {% for value, label in roles %}
+                <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+          <div class="d-grid">
+            <button class="btn btn-primary" type="submit">Login</button>
+          </div>
+        </form>
+
+        <div class="mt-3 small text-muted">
+          Demo credentials created in <code>seed_data()</code>:<br>
+          • System Admin → username: <strong>admin</strong>, password: <strong>admin</strong><br>
+          • Department Officer → username: <strong>dept1</strong>, password: <strong>dept1</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Escalated Complaints{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Escalated Complaints</h3>
+
+<!-- Quick Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Total Escalated</h6>
+        <p class="display-6 text-danger mb-0">{{ total_escalated }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>By Department</h6>
+        <p class="display-6 mb-0">{{ departments_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Avg Days Overdue</h6>
+        <p class="display-6 mb-0">{{ avg_days_overdue }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-shadow">
+  <div class="card-body">
+    {% if complaints %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Title</th>
+              <th>Department</th>
+              <th>Priority</th>
+              <th>District</th>
+              <th>Deadline</th>
+              <th>Days Overdue</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for item in complaints %}
+            {% set c = item.complaint %}
+            {% set days_overdue = item.days_overdue %}
+            <tr>
+              <td>{{ format_ticket_id(c.id) }}</td>
+              <td>{{ c.title }}</td>
+              <td>{{ c.department.name if c.department else '-' }}</td>
+              <td>
+                <span class="badge
+                  {% if c.priority=='Urgent' %}bg-danger
+                  {% elif c.priority=='Medium' %}bg-warning text-dark
+                  {% else %}bg-secondary{% endif %}">
+                  {{ c.priority }}
+                </span>
+              </td>
+              <td>{{ c.district or '-' }}</td>
+              <td>{% if c.deadline %}{{ c.deadline.strftime('%d-%m-%Y') }}{% else %}-{% endif %}</td>
+              <td>
+                {% if days_overdue > 0 %}
+                  <span class="badge bg-danger">{{ days_overdue }} days</span>
+                {% else %}
+                  <span class="badge bg-secondary">-</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge bg-danger">{{ c.status }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="small text-muted mb-0">
+        In your design, the admin can "alert department" for these tickets – that action
+        (email/notification) can be wired to this page later.
+      </p>
+    {% else %}
+      <p class="mb-0">No escalated complaints at the moment.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

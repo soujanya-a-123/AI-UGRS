@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block title %}Submit Grievance{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card card-shadow">
+      <div class="card-body">
+        <h3 class="mb-3">Submit Grievance</h3>
+        
+        <!-- Info Alert -->
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i>
+          After submission, an acknowledgement email will be sent to your registered email address 
+          with your Ticket ID and complaint details.
+        </div>
+
+        <!-- Voice Input Alert -->
+        <div class="alert alert-warning">
+          <i class="fas fa-microphone"></i>
+          <strong>Voice Input Available:</strong> Click the microphone icons to speak your complaint details instead of typing.
+        </div>
+        
+        <form method="post" id="grievanceForm">
+          <div class="mb-3">
+            <label class="form-label">Complaint Title <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="text" class="form-control" name="title" id="title" placeholder="Short title of the issue" required>
+              <button type="button" class="btn btn-outline-secondary" onclick="startVoiceInput('title')">
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Complaint Description <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <textarea class="form-control" name="description" id="description" rows="4" placeholder="Please provide detailed description of your issue..." required></textarea>
+              <button type="button" class="btn btn-outline-secondary align-self-start" onclick="startVoiceInput('description')">
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+            <small class="form-text text-muted">
+              The system will automatically assign priority and department based on your description.
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <div class="input-group">
+              <input type="text" class="form-control" name="address" id="address" placeholder="Your complete address">
+              <button type="button" class="btn btn-outline-secondary" onclick="startVoiceInput('address')">
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">District</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="district" id="district" placeholder="District">
+                <button type="button" class="btn btn-outline-secondary" onclick="startVoiceInput('district')">
+                  <i class="fas fa-microphone"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Ward / Zone</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="ward" id="ward" placeholder="Ward number or zone">
+                <button type="button" class="btn btn-outline-secondary" onclick="startVoiceInput('ward')">
+                  <i class="fas fa-microphone"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Location (Optional)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="location" id="location" placeholder="Landmark / GPS text">
+                <button type="button" class="btn btn-outline-secondary" onclick="startVoiceInput('location')">
+                  <i class="fas fa-microphone"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Preferred Department (Optional)</label>
+            <select class="form-select" name="department_id">
+              <option value="">-- Auto-assign using AI --</option>
+              {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+              {% endfor %}
+            </select>
+            <small class="form-text text-muted">
+              If you don't select, the system will automatically assign the most relevant department.
+            </small>
+          </div>
+
+          <!-- Voice Recording Section -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-microphone-alt"></i> Voice Recording (Alternative)
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <p class="mb-2">Record your entire complaint in one go:</p>
+                  <div id="recordingStatus" class="text-muted small">Click record to start speaking</div>
+                </div>
+                <div class="col-md-4 text-end">
+                  <button type="button" class="btn btn-danger mb-2" id="recordButton" onclick="toggleRecording()">
+                    <i class="fas fa-microphone"></i> Start Recording
+                  </button>
+                  <button type="button" class="btn btn-secondary mb-2" id="stopButton" onclick="stopRecording()" disabled>
+                    <i class="fas fa-stop"></i> Stop
+                  </button>
+                </div>
+              </div>
+              <audio id="audioPlayback" controls class="w-100 mt-2" style="display: none;"></audio>
+            </div>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane"></i> Submit Complaint
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Voice Input Modal -->
+<div class="modal fade" id="voiceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Voice Input</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="mb-3">
+          <i class="fas fa-microphone fa-3x text-primary"></i>
+        </div>
+        <p id="voiceStatus">Click the microphone and start speaking...</p>
+        <button type="button" class="btn btn-primary mb-3" id="modalRecordBtn" onclick="startModalRecording()">
+          <i class="fas fa-microphone"></i> Start Speaking
+        </button>
+        <div id="voiceResult" class="mt-3" style="display: none;">
+          <textarea class="form-control" id="voiceText" rows="3" placeholder="Recognized text will appear here..."></textarea>
+          <button type="button" class="btn btn-success mt-2 w-100" onclick="useVoiceText()">
+            <i class="fas fa-check"></i> Use This Text
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.recording {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+</style>
+
+<script>
+let currentField = '';
+let recognition = null;
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+
+// Check browser support
+const speechRecognitionSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+const mediaRecorderSupported = 'MediaRecorder' in window;
+
+if (!speechRecognitionSupported) {
+  document.querySelector('.alert-warning').innerHTML += 
+    '<br><small class="text-danger">Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.</small>';
+}
+
+if (!mediaRecorderSupported) {
+  document.getElementById('recordButton').disabled = true;
+  document.getElementById('recordButton').innerHTML = '<i class="fas fa-microphone-slash"></i> Recording Not Supported';
+}
+
+function startVoiceInput(fieldId) {
+  if (!speechRecognitionSupported) {
+    alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+    return;
+  }
+  
+  currentField = fieldId;
+  const modal = new bootstrap.Modal(document.getElementById('voiceModal'));
+  document.getElementById('voiceStatus').textContent = 'Click the microphone and start speaking...';
+  document.getElementById('voiceResult').style.display = 'none';
+  modal.show();
+}
+
+function startModalRecording() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-IN'; // Indian English
+  
+  recognition.onstart = function() {
+    document.getElementById('voiceStatus').textContent = 'Listening... Speak now!';
+    document.getElementById('modalRecordBtn').innerHTML = '<i class="fas fa-stop"></i> Stop';
+    document.getElementById('modalRecordBtn').classList.remove('btn-primary');
+    document.getElementById('modalRecordBtn').classList.add('btn-danger');
+    document.getElementById('modalRecordBtn').setAttribute('onclick', 'stopModalRecording()');
+    isRecording = true;
+  };
+  
+  recognition.onresult = function(event) {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        transcript += event.results[i][0].transcript;
+      } else {
+        transcript += event.results[i][0].transcript;
+      }
+    }
+    document.getElementById('voiceText').value = transcript;
+  };
+  
+  recognition.onend = function() {
+    stopModalRecording();
+    document.getElementById('voiceResult').style.display = 'block';
+    document.getElementById('voiceStatus').textContent = 'Recording completed. Review and use the text below.';
+  };
+  
+  recognition.onerror = function(event) {
+    console.error('Speech recognition error:', event.error);
+    document.getElementById('voiceStatus').textContent = 'Error: ' + event.error;
+    stopModalRecording();
+  };
+  
+  recognition.start();
+}
+
+function stopModalRecording() {
+  if (recognition) {
+    recognition.stop();
+  }
+  isRecording = false;
+  document.getElementById('modalRecordBtn').innerHTML = '<i class="fas fa-microphone"></i> Start Speaking';
+  document.getElementById('modalRecordBtn').classList.remove('btn-danger');
+  document.getElementById('modalRecordBtn').classList.add('btn-primary');
+  document.getElementById('modalRecordBtn').setAttribute('onclick', 'startModalRecording()');
+}
+
+function useVoiceText() {
+  const text = document.getElementById('voiceText').value;
+  if (text.trim()) {
+    const field = document.getElementById(currentField);
+    if (field.tagName === 'TEXTAREA') {
+      field.value = text;
+    } else {
+      field.value = text;
+    }
+  }
+  
+  const modal = bootstrap.Modal.getInstance(document.getElementById('voiceModal'));
+  modal.hide();
+}
+
+// Audio Recording Functions
+function toggleRecording() {
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+    startAudioRecording();
+  } else {
+    stopRecording();
+  }
+}
+
+async function startAudioRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+    
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = document.getElementById('audioPlayback');
+      audio.src = audioUrl;
+      audio.style.display = 'block';
+      
+      // Note: For actual implementation, you would need to send this audio to a server
+      // for speech-to-text processing. This is just the recording part.
+      document.getElementById('recordingStatus').innerHTML = 
+        '<i class="fas fa-check text-success"></i> Recording completed. Playback available below.';
+    };
+    
+    mediaRecorder.start();
+    document.getElementById('recordButton').innerHTML = '<i class="fas fa-pause"></i> Stop Recording';
+    document.getElementById('recordButton').classList.remove('btn-danger');
+    document.getElementById('recordButton').classList.add('btn-warning');
+    document.getElementById('stopButton').disabled = false;
+    document.getElementById('recordingStatus').innerHTML = 
+      '<i class="fas fa-circle text-danger"></i> Recording in progress...';
+    
+  } catch (error) {
+    console.error('Error accessing microphone:', error);
+    document.getElementById('recordingStatus').innerHTML = 
+      '<i class="fas fa-times text-danger"></i> Error accessing microphone. Please check permissions.';
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    
+    document.getElementById('recordButton').innerHTML = '<i class="fas fa-microphone"></i> Start Recording';
+    document.getElementById('recordButton').classList.remove('btn-warning');
+    document.getElementById('recordButton').classList.add('btn-danger');
+    document.getElementById('stopButton').disabled = true;
+  }
+}
+
+// Auto-stop recording when leaving the page
+window.addEventListener('beforeunload', stopRecording);
+</script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}System Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h3>System Admin Dashboard</h3>
+  <div class="btn-group">
+    <a href="{{ url_for('admin_grievances') }}" class="btn btn-outline-primary btn-sm">Grievances</a>
+    <a href="{{ url_for('admin_escalated') }}" class="btn btn-outline-danger btn-sm">Escalated</a>
+    <a href="{{ url_for('admin_overview') }}" class="btn btn-outline-secondary btn-sm">Complaint Overview</a>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Total Complaints</h6>
+        <p class="display-6 mb-0">{{ total }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Pending / In-Progress</h6>
+        <p class="display-6 mb-0">{{ pending }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Resolved</h6>
+        <p class="display-6 text-success mb-0">{{ resolved }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-shadow text-center">
+      <div class="card-body">
+        <h6>Escalated</h6>
+        <p class="display-6 text-danger mb-0">{{ escalated }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3">
+  <!-- Status Distribution Pie Chart -->
+  <div class="col-lg-6">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Complaint Status Distribution</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="statusChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority Distribution Bar Chart -->
+  <div class="col-lg-6">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Priority Distribution</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="priorityChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Department Distribution Chart -->
+  <div class="col-lg-12">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Complaints by Department</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="departmentChart" width="400" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="mt-3 text-muted">
+  Overdue complaints are auto-escalated whenever this dashboard or the admin pages are opened.
+</p>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Status Distribution Pie Chart
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+const statusChart = new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Pending', 'In-Progress', 'Resolved', 'Escalated'],
+        datasets: [{
+            data: [
+                {{ pending }}, 
+                {{ total - pending - resolved - escalated }}, 
+                {{ resolved }}, 
+                {{ escalated }}
+            ],
+            backgroundColor: [
+                '#6c757d',  // Pending - gray
+                '#ffc107',  // In-Progress - yellow
+                '#198754',  // Resolved - green
+                '#dc3545'   // Escalated - red
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = Math.round((value / total) * 100);
+                        return `${label}: ${value} (${percentage}%)`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Priority Distribution Bar Chart - FIXED
+const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+const priorityChart = new Chart(priorityCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Low', 'Medium', 'Urgent'],
+        datasets: [{
+            label: 'Number of Complaints',
+            data: [
+                {{ low_priority }},
+                {{ medium_priority }},
+                {{ urgent_priority }}
+            ],
+            backgroundColor: [
+                '#6c757d',  // Low - gray
+                '#ffc107',  // Medium - yellow
+                '#dc3545'   // Urgent - red
+            ],
+            borderColor: [
+                '#495057',
+                '#e0a800',
+                '#c82333'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Department Distribution Chart
+const deptCtx = document.getElementById('departmentChart').getContext('2d');
+const departmentChart = new Chart(deptCtx, {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for dept in departments %}
+                "{{ dept.name }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Complaints per Department',
+            data: [
+                {% for dept in departments %}
+                    {{ dept.complaints|length }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: '#0d6efd',
+            borderColor: '#0b5ed7',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,154 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": ["Hello", "Hi", "Hey", "Good morning", "Good afternoon", "Is anyone there?", "Hey there", "Namaste"],
+      "responses": ["Hello! I'm your AI grievance redressal assistant. How can I help you with complaint registration or tracking today?", "Hi there! I'm here to assist you with grievance submission, tracking, and general queries about the system. What do you need help with?", "Greetings! Welcome to the AI-Driven Grievance Redressal System. How can I assist you today?"],
+      "context_set": [""]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": ["Bye", "Goodbye", "See you later", "I have to go", "Talk to you later", "Thanks, bye", "That's all"],
+      "responses": ["Thank you for using the grievance redressal system! Remember to keep your Ticket ID safe for tracking.", "Take care! Feel free to return if you have more questions about grievance submission or tracking.", "Goodbye! We're here to help whenever you need assistance with civic issues."],
+      "context_set": [""]
+    },
+    {
+      "tag": "submit_complaint",
+      "patterns": ["How to submit complaint?", "File a grievance", "Register complaint", "Submit issue", "How to file grievance?", "New complaint process", "I want to report a problem"],
+      "responses": ["To submit a complaint: 1) Login to your citizen account 2) Click 'Submit Grievance' 3) Fill complaint details 4) The AI will auto-assign department and priority. You'll receive a Ticket ID for tracking.", "You can submit grievances through the citizen portal. After login, use the 'Submit Grievance' form. The system uses AI to route your complaint to the right department automatically."],
+      "context_set": [""]
+    },
+    {
+      "tag": "track_complaint",
+      "patterns": ["Track my complaint", "Check complaint status", "Where is my grievance?", "Ticket status", "How to track complaint?", "Complaint progress", "Status update"],
+      "responses": ["You can track complaints using your Ticket ID (format: AI-UGRS-0001) on the 'Track Complaint' page. No login required for tracking.", "To track: Visit the Track Complaint section and enter your Ticket ID. You'll see current status, assigned department, and resolution progress."],
+      "context_set": [""]
+    },
+    {
+      "tag": "ticket_id_format",
+      "patterns": ["What is ticket ID?", "Ticket format", "How ticket ID looks?", "Complaint number format", "AI-UGRS meaning"],
+      "responses": ["Ticket IDs follow this format: AI-UGRS-0001 (AI-Driven Unified Grievance Redressal System). You receive this after complaint submission.", "Your Ticket ID looks like: AI-UGRS- followed by 4 digits (e.g., AI-UGRS-0123). Keep this safe for all future tracking."],
+      "context_set": [""]
+    },
+    {
+      "tag": "departments",
+      "patterns": ["Which departments?", "What issues can I report?", "Types of complaints", "Supported departments", "What problems handled?"],
+      "responses": ["We handle: Water Supply issues, Roads & Transport problems, Sanitation complaints, and more. The AI automatically routes your complaint to the right department.", "Supported departments include: Water Supply (leaks, drainage), Roads & Transport (potholes, street lights), Sanitation (garbage, cleaning). Describe your issue and AI will assign the department."],
+      "context_set": [""]
+    },
+    {
+      "tag": "registration",
+      "patterns": ["How to register?", "Create account", "Citizen registration", "Sign up process", "New user registration"],
+      "responses": ["Citizen registration: Click 'Citizen Login' then 'Register'. Provide your name, email, and create a password. You'll then be able to submit grievances.", "To register as citizen: Go to Citizen Registration page, fill basic details, verify email, and you're ready to submit complaints."],
+      "context_set": [""]
+    },
+    {
+      "tag": "complaint_status",
+      "patterns": ["What status means?", "Status types", "Pending vs In-Progress", "What is escalated?", "Resolution status"],
+      "responses": ["Status types: Pending (just submitted), In-Progress (department working on it), Resolved (completed), Escalated (overdue, needs attention).", "Complaint status: Pending - awaiting department action; In-Progress - being addressed; Resolved - completed; Escalated - past deadline, requires urgent action."],
+      "context_set": [""]
+    },
+    {
+      "tag": "priority_levels",
+      "patterns": ["What is priority?", "Urgent complaints", "Priority levels", "How priority decided?", "High priority issues"],
+      "responses": ["Priority levels: Low (suggestions, minor issues), Medium (standard complaints), Urgent (accidents, dangers, major disruptions). AI auto-assigns based on your description.", "The AI analyzes your complaint description to assign priority: Urgent for emergencies, Medium for regular issues, Low for minor concerns or suggestions."],
+      "context_set": [""]
+    },
+    {
+      "tag": "deadline",
+      "patterns": ["Resolution time", "How long to resolve?", "Complaint deadline", "Time frame", "When will it be fixed?"],
+      "responses": ["Standard resolution timeframe is 7 days. Urgent complaints may have shorter deadlines. Overdue complaints get automatically escalated.", "Most complaints have a 7-day resolution deadline. The system escalates complaints that pass this deadline to ensure timely action."],
+      "context_set": [""]
+    },
+    {
+      "tag": "escalation",
+      "patterns": ["What is escalation?", "Escalated complaints", "Why escalated?", "Overdue complaints", "Department not responding"],
+      "responses": ["Escalation happens when complaints pass their deadline without resolution. Escalated complaints get higher priority and admin attention.", "Complaints are auto-escalated if not resolved within deadline. This alerts administrators and puts pressure on departments for faster resolution."],
+      "context_set": [""]
+    },
+    {
+      "tag": "ai_features",
+      "patterns": ["How AI helps?", "AI features", "Smart routing", "Auto department assignment", "AI in grievance system"],
+      "responses": ["Our AI: 1) Auto-routes complaints to correct department 2) Assigns priority based on urgency 3) Detects overdue complaints 4) Provides smart analytics for officials.", "AI features include: Automatic department routing using NLP, priority classification, deadline monitoring, and escalation of overdue complaints for better efficiency."],
+      "context_set": [""]
+    },
+    {
+      "tag": "water_complaints",
+      "patterns": ["Water leak", "No water supply", "Pipe burst", "Drainage issue", "Sewage problem", "Water contamination"],
+      "responses": ["Water supply issues are handled by the Water Supply department. Describe your water-related problem in detail and the AI will route it correctly.", "For water leaks, no supply, drainage, or sewage issues - these go to Water Supply department. Be specific about location and problem severity."],
+      "context_set": [""]
+    },
+    {
+      "tag": "road_complaints",
+      "patterns": ["Pothole", "Bad road", "Street light not working", "Traffic signal issue", "Footpath problem", "Road repair"],
+      "responses": ["Road and transport issues go to Roads & Transport department. Include exact location and photos if possible for faster resolution.", "For potholes, street lights, traffic signals, or road damage - these are handled by Roads & Transport department. Provide precise location details."],
+      "context_set": [""]
+    },
+    {
+      "tag": "sanitation_complaints",
+      "patterns": ["Garbage not collected", "Trash accumulation", "Cleaning issue", "Dirty area", "Waste management", "Sanitation problem"],
+      "responses": ["Sanitation complaints (garbage collection, cleaning, waste management) are handled by Sanitation department. Describe the location and issue clearly.", "For garbage collection issues, unclean areas, or waste management problems - these go to Sanitation department. Specific addresses help faster resolution."],
+      "context_set": [""]
+    },
+    {
+      "tag": "emergency",
+      "patterns": ["Emergency complaint", "Urgent issue", "Immediate action needed", "Critical situation", "Dangerous condition"],
+      "responses": ["**For emergencies causing immediate danger (major accidents, structural collapses, life-threatening situations), please contact emergency services directly first, then submit grievance.**", "**Critical emergencies requiring immediate action: Contact local emergency services first. Then submit grievance with 'URGENT' in description for priority handling.**"],
+      "context_set": [""]
+    },
+    {
+      "tag": "resolution_process",
+      "patterns": ["What happens after submission?", "Complaint process", "How department handles?", "Resolution steps", "Workflow after complaint"],
+      "responses": ["Process: 1) You submit complaint 2) AI assigns department & priority 3) Department reviews & works on it 4) Status updates provided 5) Resolution communicated via email.", "After submission: Department receives complaint, assigns official, works on resolution, updates status, and notifies you upon completion. You can track progress anytime."],
+      "context_set": [""]
+    },
+    {
+      "tag": "email_notifications",
+      "patterns": ["Will I get email updates?", "Email notifications", "How notified?", "Communication about complaint", "Status alerts"],
+      "responses": ["Yes! You receive: 1) Acknowledgement email after submission 2) Resolution email when completed 3) You can also track manually anytime.", "The system sends email notifications for complaint acknowledgement and resolution. Ensure your registered email is correct for all updates."],
+      "context_set": [""]
+    },
+    {
+      "tag": "multiple_complaints",
+      "patterns": ["Can I submit multiple complaints?", "Multiple issues", "Several problems", "Bulk complaints", "Many grievances"],
+      "responses": ["Yes, you can submit multiple complaints. Each gets a separate Ticket ID. It's better to submit separate complaints for different issues for proper tracking.", "Multiple complaints are allowed. Submit separate grievances for different issues/locations as each follows its own resolution process with unique Ticket ID."],
+      "context_set": [""]
+    },
+    {
+      "tag": "update_complaint",
+      "patterns": ["Can I update complaint?", "Edit grievance", "Change complaint details", "Add information", "Modify submitted complaint"],
+      "responses": ["Once submitted, complaints cannot be edited. However, you can submit additional information as a new complaint referencing the original Ticket ID.", "Submitted complaints cannot be modified. For additional information, submit a new complaint and mention the original Ticket ID in description for reference."],
+      "context_set": [""]
+    },
+    {
+      "tag": "voice_input",
+      "patterns": ["Can I speak complaint?", "Voice input", "Microphone feature", "Speech to text", "Talk instead of type"],
+      "responses": ["Yes! The system supports voice input. Click the microphone icon next to any field to speak instead of type. This uses your browser's speech recognition.", "Voice input is available! Look for microphone buttons in the grievance form. You can speak your complaint details which will be converted to text automatically."],
+      "context_set": [""]
+    },
+    {
+      "tag": "download_acknowledgement",
+      "patterns": ["Download receipt", "Get acknowledgement PDF", "Save complaint proof", "Print acknowledgement", "Complaint certificate"],
+      "responses": ["You can download acknowledgement PDF from 'My Complaints' page. Each complaint has a download button for official receipt with Ticket ID.", "Acknowledgement PDFs are available in your 'My Complaints' section. Download for official records - includes all complaint details and Ticket ID."],
+      "context_set": [""]
+    },
+    {
+      "tag": "login_issues",
+      "patterns": ["Cannot login", "Login problem", "Forgot password", "Account locked", "Access issues"],
+      "responses": ["For login issues: Use 'Forgot Password' if available, or contact system administrator. Ensure you're using correct email and password.", "Login problems: Check email/password, try password reset, or contact support. Citizens and officials have separate login portals."],
+      "context_set": [""]
+    },
+    {
+      "tag": "appreciation",
+      "patterns": ["Thank you", "Thanks", "That was helpful", "I appreciate it", "Good bot", "Helpful information"],
+      "responses": ["You're welcome! We're here to make grievance resolution efficient and transparent. Don't hesitate to ask if you need more help.", "Glad to help! The system is designed for citizen convenience. Remember to keep your Ticket IDs safe for tracking.", "Any time! Your proactive approach to civic issues helps improve community services for everyone."],
+      "context_set": [""]
+    },
+    {
+      "tag": "noanswer",
+      "patterns": [],
+      "responses": ["I'm sorry, I'm designed to help with grievance system queries. For specific complaint details or technical issues, please contact the system administrator.", "I didn't quite understand. Could you rephrase your question about the grievance system? For account-specific issues, you may need to contact support.", "My knowledge focuses on the grievance redressal process. For complex technical problems or personal account issues, please reach out to the support team."],
+      "context_set": [""]
+    }
+  ]
+}

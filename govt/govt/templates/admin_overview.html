@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}Complaint Overview{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Complaint Overview by Department</h3>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Department Performance</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="departmentChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card card-shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Resolution Rate</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="resolutionChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-shadow">
+  <div class="card-body">
+    {% if overview %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Total Complaints</th>
+              <th>Resolved</th>
+              <th>Escalated</th>
+              <th>Resolution Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for row in overview %}
+            {% set resolution_rate = (row.resolved / row.total * 100) if row.total > 0 else 0 %}
+            {% set color = 'table-success' if resolution_rate >= 80 else ('table-danger' if resolution_rate < 50 else 'table-warning') %}
+            <tr class="{{ color }}">
+              <td>{{ row.department.name }}</td>
+              <td>{{ row.total }}</td>
+              <td>{{ row.resolved }}</td>
+              <td>{{ row.escalated }}</td>
+              <td>
+                <div class="progress" style="height: 20px;">
+                  <div class="progress-bar {% if resolution_rate >= 80 %}bg-success{% elif resolution_rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                       style="width: {{ resolution_rate }}%">
+                    {{ "%.1f"|format(resolution_rate) }}%
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0">No departments / complaints yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Department Performance Chart
+const deptCtx = document.getElementById('departmentChart').getContext('2d');
+const departmentChart = new Chart(deptCtx, {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for row in overview %}
+                "{{ row.department.name }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [
+            {
+                label: 'Total Complaints',
+                data: [
+                    {% for row in overview %}
+                        {{ row.total }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: '#0d6efd',
+                borderColor: '#0b5ed7',
+                borderWidth: 1
+            },
+            {
+                label: 'Resolved',
+                data: [
+                    {% for row in overview %}
+                        {{ row.resolved }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: '#198754',
+                borderColor: '#157347',
+                borderWidth: 1
+            },
+            {
+                label: 'Escalated',
+                data: [
+                    {% for row in overview %}
+                        {{ row.escalated }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: '#dc3545',
+                borderColor: '#bb2d3b',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Resolution Rate Pie Chart
+const resolutionCtx = document.getElementById('resolutionChart').getContext('2d');
+const resolutionChart = new Chart(resolutionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Resolved', 'Pending/Escalated'],
+        datasets: [{
+            data: [
+                {{ overview|sum(attribute='resolved') }},
+                {{ overview|sum(attribute='total') - overview|sum(attribute='resolved') }}
+            ],
+            backgroundColor: [
+                '#198754',
+                '#6c757d'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = Math.round((value / total) * 100);
+                        return `${label}: ${value} (${percentage}%)`;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
