@@ -53,6 +53,8 @@ To build an AI-enabled unified grievance portal that automates complaint classif
 
 working image:
 <img width="1366" height="768" alt="Image" src="https://github.com/user-attachments/assets/dac656ea-dac3-445f-88ab-f0b10b32bcf5" />
+<img width="1366" height="768" alt="Image" src="https://github.com/user-attachments/assets/b01530dd-540f-45ee-aa35-ddfd2ae85c34" />
+<img width="1366" height="768" alt="Image" src="https://github.com/user-attachments/assets/57ce4a32-57c9-4e4f-8792-f0de8a1657e8" />
 
 
 
